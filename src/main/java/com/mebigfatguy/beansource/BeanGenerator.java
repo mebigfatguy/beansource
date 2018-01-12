@@ -17,7 +17,6 @@ package com.mebigfatguy.beansource;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface BeanGenerator
-{
-	public Object getBean(HttpServletRequest req);
+public interface BeanGenerator {
+    public Object getBean(HttpServletRequest req);
 }

@@ -15,20 +15,17 @@
  */
 package com.mebigfatguy.beansource;
 
-public class BeanConfigurationException extends Exception 
-{
-	private static final long serialVersionUID = -7863908958773312304L;
+public class BeanConfigurationException extends Exception {
+    private static final long serialVersionUID = -7863908958773312304L;
 
-	public BeanConfigurationException()
-	{}
-	
-	public BeanConfigurationException(String message) 
-	{
-		super(message);
-	}
-	
-	public BeanConfigurationException(String message, Throwable t)
-	{
-		super(message, t);
-	}
+    public BeanConfigurationException() {
+    }
+
+    public BeanConfigurationException(String message) {
+        super(message);
+    }
+
+    public BeanConfigurationException(String message, Throwable t) {
+        super(message, t);
+    }
 }

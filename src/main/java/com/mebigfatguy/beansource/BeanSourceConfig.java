@@ -17,32 +17,25 @@ package com.mebigfatguy.beansource;
 
 import java.net.URL;
 
-public class BeanSourceConfig
-{
-	private BeanGenerator beanGen;
-	private URL beanStyleSheet;
-	
-	public BeanSourceConfig(String genClass, String styleSheet) throws BeanConfigurationException
-	{
-		try
-		{
-			Class<?> cls = Class.forName(genClass);
-			beanGen = (BeanGenerator)cls.newInstance();
-			beanStyleSheet = new URL(styleSheet);
-		}
-		catch (Exception e)
-		{
-			throw new BeanConfigurationException("Failed creating BeanGenerator for class " + genClass, e);
-		}
-	}
-	
-	public BeanGenerator getGenerator()
-	{
-		return beanGen;
-	}
-	
-	public URL getTransform()
-	{
-		return beanStyleSheet;
-	}
+public class BeanSourceConfig {
+    private BeanGenerator beanGen;
+    private URL beanStyleSheet;
+
+    public BeanSourceConfig(String genClass, String styleSheet) throws BeanConfigurationException {
+        try {
+            Class<?> cls = Class.forName(genClass);
+            beanGen = (BeanGenerator) cls.newInstance();
+            beanStyleSheet = new URL(styleSheet);
+        } catch (Exception e) {
+            throw new BeanConfigurationException("Failed creating BeanGenerator for class " + genClass, e);
+        }
+    }
+
+    public BeanGenerator getGenerator() {
+        return beanGen;
+    }
+
+    public URL getTransform() {
+        return beanStyleSheet;
+    }
 }
