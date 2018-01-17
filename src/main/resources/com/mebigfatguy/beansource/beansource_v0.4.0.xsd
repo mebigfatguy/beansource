@@ -15,7 +15,9 @@
  * limitations under the License.
  */
  -->
- <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://raw.githubusercontent.com/mebigfatguy/beansource/master/src/main/resources/com/mebigfatguy/beansource/beansource_v0.4.0.xsd">
+ <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+             targetNamespace="https://raw.githubusercontent.com/mebigfatguy/beansource/master/src/main/resources/com/mebigfatguy/beansource/beansource_v0.4.0.xsd"
+             elementFormDefault="qualified">
 
 	<xsd:complexType name="BeanSourceType">
 		<xsd:choice minOccurs="1" maxOccurs="1">
