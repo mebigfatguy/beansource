@@ -18,12 +18,13 @@
 	
 	<xsd:complexType name="ListType">
 		<xsd:sequence>
+			<xsd:element name="item" type="BeanSourceType" maxOccurs="unbounded"/>
 		</xsd:sequence>
-		<xsd:attribute name="name" type="xsd:string"/>
 	</xsd:complexType>
 	
 	<xsd:complexType name="MapType">
 		<xsd:sequence>
+			<xsd:element name="entry" type="EntryType" maxOccurs="unbounded"/>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string"/>
 	</xsd:complexType>
@@ -34,6 +35,13 @@
 				<xsd:attribute name="name" type="xsd:string"/>
             </xsd:extension>
 		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="EntryType">
+		<xsd:sequence>
+			<xsd:element name="key" type="BeanSource"/>
+			<xsd:element name="value" type="BeanSource"/>
+		</xsd:sequence>
 	</xsd:complexType>
 		
 	<xsd:element name="beansource" type="BeanSourceType"/>
