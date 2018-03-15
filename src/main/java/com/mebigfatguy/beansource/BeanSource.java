@@ -23,7 +23,6 @@ import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.sax.SAXSource;
@@ -76,7 +75,7 @@ public class BeanSource extends SAXSource {
 
         private static final String BEAN = "bean";
         private static final String ARRAY = "array";
-        private static final String LIST = "list";
+        private static final String COLLECTION = "collection";
         private static final String MAP = "map";
         private static final String TYPE = "type";
         private static final String ENTRY = "entry";
@@ -188,12 +187,12 @@ public class BeanSource extends SAXSource {
                     parseObject(oo, ITEM);
                 }
                 contentHandler.endElement("", "", objectName);
-            } else if (o instanceof List) {
+            } else if (o instanceof Collection) {
                 AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute("", "", TYPE, LIST));
+                aa.addAttribute(new Attribute("", "", TYPE, COLLECTION));
                 contentHandler.startElement("", "", objectName, aa);
-                List<Object> l = (List<Object>) o;
-                for (Object oo : l) {
+                Collection<Object> c = (Collection<Object>) o;
+                for (Object oo : c) {
                     parseObject(oo, ITEM);
                 }
                 contentHandler.endElement("", "", objectName);
@@ -211,6 +210,11 @@ public class BeanSource extends SAXSource {
                 contentHandler.endElement("", "", objectName);
             } else if (validBeanClass(o.getClass())) {
                 emitPropertyAndValue(objectName, o);
+            } else if (o instanceof Enum) {
+                emitPropertyAndValue(objectName, ((Enum<?>) o).name());
+            } else if (o instanceof java.util.Date) {
+                DateFormat df = DateFormat.getDateTimeInstance();
+                emitPropertyAndValue(objectName, df.format((Date) o));
             } else {
                 AttributesAdapter aa = new AttributesAdapter();
                 aa.addAttribute(new Attribute("", "", TYPE, BEAN));
