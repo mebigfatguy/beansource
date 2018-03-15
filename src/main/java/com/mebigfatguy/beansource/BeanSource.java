@@ -33,6 +33,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import com.mebigfatguy.beansource.annotations.BeanSourceProperty;
+
 public class BeanSource extends SAXSource {
     private Object bean;
     private String beanName;
@@ -230,11 +232,24 @@ public class BeanSource extends SAXSource {
         }
 
         private void emit(Object o, Method m) throws SAXException {
-            try {
-                Class<?> c = m.getReturnType();
+            String name = m.getName().substring("get".length());
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
 
-                String name = m.getName().substring("get".length());
-                name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            try {
+                BeanSourceProperty[] properties = m.getAnnotationsByType(BeanSourceProperty.class);
+                if ((properties != null) && (properties.length == 1)) {
+                    switch (properties[0].value()) {
+                        case EXCLUDE:
+                            return;
+                        case SIMPLE:
+                            emitPropertyAndValue(name, String.valueOf(m.invoke(o, new Object[] {})));
+                            return;
+                        default:
+                        break;
+                    }
+                }
+
+                Class<?> c = m.getReturnType();
 
                 if (c.isArray()) {
                     Class<?> arrayClass = c.getComponentType();
