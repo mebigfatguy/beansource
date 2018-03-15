@@ -210,7 +210,7 @@ public class BeanSourceTest {
             trans.put(OutputKeys.METHOD, "xml");
             transform(null, b3, "bean3", new StreamResult(sw), trans);
             sw.flush();
-            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean3><bean1><name>example</name></bean1></Bean3>", sw.toString());
+            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean3 type=\"bean\"><bean1 type=\"bean\"><name>example</name></bean1></bean3>", sw.toString());
         } catch (Exception e) {
             String msg = e.getMessage();
             Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
