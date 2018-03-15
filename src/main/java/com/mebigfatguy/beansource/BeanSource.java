@@ -284,7 +284,7 @@ public class BeanSource extends SAXSource {
         private boolean validBeanClass(Class<?> c) {
             return ((c == boolean.class) || (c == Boolean.class) || (c == byte.class) || (c == Byte.class) || (c == char.class) || (c == Character.class)
                     || (c == double.class) || (c == Double.class) || (c == float.class) || (c == Float.class) || (c == int.class) || (c == Integer.class)
-                    || (c == long.class) || (c == Long.class) || (c == short.class) || (c == Short.class) || (c == String.class));
+                    || (c == long.class) || (c == Long.class) || (c == short.class) || (c == Short.class) || (c == String.class) || (c == Void.class));
         }
 
         private void emitPropertyAndValue(String property, Object value) throws SAXException {
