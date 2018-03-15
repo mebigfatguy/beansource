@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.sax.SAXSource;
@@ -37,9 +38,11 @@ import org.xml.sax.XMLReader;
 
 public class BeanSource extends SAXSource {
     private Object bean;
+    private String beanName;
 
-    public BeanSource(Object javaBean) {
+    public BeanSource(Object javaBean, String name) {
         bean = javaBean;
+        beanName = name;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class BeanSource extends SAXSource {
 
     @Override
     public XMLReader getXMLReader() {
-        return new BeanXMLReader(bean);
+        return new BeanXMLReader(bean, beanName);
     }
 
     @Override
@@ -70,20 +73,32 @@ public class BeanSource extends SAXSource {
     }
 
     private static class BeanXMLReader implements XMLReader {
+        private static final String URI = "https://raw.githubusercontent.com/mebigfatguy/beansource/master/src/main/resources/com/mebigfatguy/beansource/beansource_v0.4.0.xsd";
+
+        private static final String PREFIX = "bs:";
+        private static final String BEANSOURCE = "beansource";
+        private static final String BEAN = "bean";
+        private static final String LIST = "list";
+        private static final String MAP = "map";
+        private static final String TYPE = "type";
         private static final String ENTRY = "entry";
         private static final String KEY = "key";
         private static final String VALUE = "value";
         private static final String ITEM = "item";
+        private static final String NAME = "name";
+        private static final String PROPERTY = "property";
 
         private Object bean;
+        private String beanName;
         private AttributesAdapter emptyAttributes = new AttributesAdapter();
         private ContentHandler contentHandler = null;
         private DTDHandler dtdHandler = null;
         private EntityResolver entityResolver = null;
         private ErrorHandler errorHandler = null;
 
-        public BeanXMLReader(Object javaBean) {
+        public BeanXMLReader(Object javaBean, String name) {
             bean = javaBean;
+            beanName = name;
         }
 
         @Override
@@ -160,37 +175,34 @@ public class BeanSource extends SAXSource {
             }
 
             contentHandler.startDocument();
-            parseObject(bean, null);
+            contentHandler.startElement(URI, BEANSOURCE, PREFIX + BEANSOURCE, emptyAttributes);
+            parseObject(bean, beanName);
+            contentHandler.endElement(URI, BEANSOURCE, PREFIX + BEANSOURCE);
             contentHandler.endDocument();
         }
 
-        private void parseObject(Object o, String objectAliasName) throws SAXException {
+        private void parseObject(Object o, String objectName) throws SAXException {
             String beanClass;
 
-            if (objectAliasName != null) {
-                beanClass = objectAliasName;
+            if (o.getClass().isArray()) {
+
+            } else if (o instanceof List) {
+
+            } else if (o instanceof Map) {
             } else {
-                beanClass = o.getClass().getName();
-                int dollarPos = beanClass.lastIndexOf('$');
-                if (dollarPos >= 0) {
-                    beanClass = beanClass.substring(dollarPos + 1);
+                AttributesAdapter aa = new AttributesAdapter();
+                aa.addAttribute(new Attribute(URI, NAME, PREFIX + NAME, objectName));
+                contentHandler.startElement(URI, BEAN, PREFIX + BEAN, aa);
+
+                Method[] methods = o.getClass().getMethods();
+                for (Method m : methods) {
+                    if (m.getName().startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
+                            && !m.getName().equals("getClass")) {
+                        emit(o, m);
+                    }
                 }
-                int dotPos = beanClass.lastIndexOf('.');
-                if (dotPos >= 0) {
-                    beanClass = beanClass.substring(dotPos + 1);
-                }
+                contentHandler.endElement(URI, BEAN, PREFIX + BEAN);
             }
-
-            contentHandler.startElement("", "", beanClass, emptyAttributes);
-
-            Method[] methods = o.getClass().getDeclaredMethods();
-            for (Method m : methods) {
-                if (m.getName().startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)) {
-                    emit(o, m);
-                }
-            }
-
-            contentHandler.endElement("", "", beanClass);
         }
 
         private void emit(Object o, Method m) throws SAXException {

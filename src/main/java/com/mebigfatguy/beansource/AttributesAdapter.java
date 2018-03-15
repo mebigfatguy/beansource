@@ -15,66 +15,102 @@
  */
 package com.mebigfatguy.beansource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xml.sax.Attributes;
 
 public class AttributesAdapter implements Attributes {
+
+    private List<Attribute> attributes = new ArrayList<>(3);
+
+    public void addAttribute(Attribute attribute) {
+        attributes.add(attribute);
+    }
+
     @Override
     public int getIndex(String uri, String localName) {
-        return 0;
+        int index = 0;
+        for (Attribute att : attributes) {
+            if (att.getUri().equals(uri) && att.getLocalName().equals(localName)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
     }
 
     @Override
     public int getIndex(String qName) {
-        return 0;
+        int index = 0;
+        for (Attribute att : attributes) {
+            if (att.getQName().equals(qName)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
     }
 
     @Override
     public int getLength() {
-        return 0;
+        return attributes.size();
     }
 
     @Override
     public String getLocalName(int index) {
-        return null;
+        return attributes.get(index).getLocalName();
     }
 
     @Override
     public String getQName(int index) {
-        return null;
+        return attributes.get(index).getQName();
     }
 
     @Override
     public String getType(int index) {
-        return null;
+        return "";
     }
 
     @Override
     public String getType(String uri, String localName) {
-        return null;
+        return "";
     }
 
     @Override
     public String getType(String qName) {
-        return null;
+        return "";
     }
 
     @Override
     public String getURI(int index) {
-        return null;
+        return attributes.get(index).getUri();
     }
 
     @Override
     public String getValue(int index) {
-        return null;
+        return attributes.get(index).getValue();
     }
 
     @Override
     public String getValue(String uri, String localName) {
+        for (Attribute att : attributes) {
+            if (att.getUri().equals(uri) && att.getLocalName().equals(localName)) {
+                return att.getValue();
+            }
+        }
+
         return null;
     }
 
     @Override
     public String getValue(String qName) {
+        for (Attribute att : attributes) {
+            if (att.getQName().equals(qName)) {
+                return att.getValue();
+            }
+        }
+
         return null;
     }
 }

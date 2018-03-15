@@ -34,6 +34,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -52,11 +53,16 @@ public class BeanSourceTest {
         try {
             Bean1 b1 = new Bean1();
             DOMResult dr = getDOMResult();
-            transform(null, b1, dr, null);
+            transform(null, b1, "bean1", dr, null);
             Document d = (Document) dr.getNode();
+
+            debug(d);
+
             Element root = d.getDocumentElement();
-            Assert.assertEquals("Bean1", root.getNodeName());
-            NodeList nodes = root.getElementsByTagName("name");
+            Assert.assertEquals("bs:beansource", root.getNodeName());
+            Element bean = (Element) root.getFirstChild();
+            Assert.assertEquals("Bean1", bean.getNodeName());
+            NodeList nodes = bean.getElementsByTagName("name");
             Assert.assertEquals(1, nodes.getLength());
             Element child = (Element) nodes.item(0);
             nodes = child.getChildNodes();
@@ -80,7 +86,7 @@ public class BeanSourceTest {
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "text");
-            transform(new StreamSource(new StringReader(xsl)), b2, new StreamResult(sw), trans);
+            transform(new StreamSource(new StringReader(xsl)), b2, "bean2", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals("onefishtwofishredfishbluefish", sw.toString());
         } catch (Exception e) {
@@ -96,7 +102,7 @@ public class BeanSourceTest {
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "xml");
-            transform(null, b3, new StreamResult(sw), trans);
+            transform(null, b3, "bean3", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean3><bean1><name>example</name></bean1></Bean3>", sw.toString());
         } catch (Exception e) {
@@ -112,7 +118,7 @@ public class BeanSourceTest {
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "xml");
-            transform(null, b4, new StreamResult(sw), trans);
+            transform(null, b4, "bean4", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean4><info><entry><key>A</key><value>1</value></entry><entry><key>B</key><value>2</value></entry></info></Bean4>",
@@ -130,7 +136,7 @@ public class BeanSourceTest {
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "xml");
-            transform(null, b5, new StreamResult(sw), trans);
+            transform(null, b5, "bean5", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean5><names><item>Manny</item><item>Moe</item><item>Jack</item></names></Bean5>",
                     sw.toString());
@@ -140,7 +146,7 @@ public class BeanSourceTest {
         }
     }
 
-    private void transform(Source styleSheet, Object bean, Result result, Properties transformProps)
+    private void transform(Source styleSheet, Object bean, String name, Result result, Properties transformProps)
             throws TransformerConfigurationException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer t;
@@ -154,7 +160,7 @@ public class BeanSourceTest {
         if (transformProps != null) {
             t.setOutputProperties(transformProps);
         }
-        t.transform(new BeanSource(bean), result);
+        t.transform(new BeanSource(bean, name), result);
     }
 
     private DOMResult getDOMResult() throws ParserConfigurationException {
@@ -162,6 +168,22 @@ public class BeanSourceTest {
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document d = db.newDocument();
         return new DOMResult(d);
+    }
+
+    private void debug(Document d) {
+        try {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer t = tf.newTransformer();
+
+            t.setOutputProperty(OutputKeys.METHOD, "xml");
+            t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "4");
+
+            t.transform(new DOMSource(d), new StreamResult(System.out));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static class Bean1 {
