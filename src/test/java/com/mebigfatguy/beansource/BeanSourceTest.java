@@ -272,6 +272,22 @@ public class BeanSourceTest {
         }
     }
 
+    @Test
+    public void testSimpleField() {
+        try {
+            Bean7 b7 = new Bean7();
+            StringWriter sw = new StringWriter();
+            Properties trans = new Properties();
+            trans.put(OutputKeys.METHOD, "xml");
+            transform(null, b7, "bean7", new StreamResult(sw), trans);
+            sw.flush();
+            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean7 type=\"bean\"><simpleton>Simple</simpleton></bean7>", sw.toString());
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
     private void transform(Source styleSheet, Object bean, String name, Result result, Properties transformProps)
             throws TransformerConfigurationException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
@@ -357,6 +373,18 @@ public class BeanSourceTest {
         @BeanSourceProperty(BeanSourceProperty.Type.EXCLUDE)
         public int getAge() {
             return 22;
+        }
+
+        @Override
+        public String toString() {
+            return "Simple";
+        }
+    }
+
+    public static class Bean7 {
+        @BeanSourceProperty(BeanSourceProperty.Type.SIMPLE)
+        public Object getSimpleton() {
+            return new Bean6();
         }
     }
 }
