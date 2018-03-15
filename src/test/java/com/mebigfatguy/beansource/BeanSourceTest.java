@@ -187,11 +187,18 @@ public class BeanSourceTest {
     public void testArrayGetterBeanSource() {
         try {
             Bean2 b2 = new Bean2();
-            String xsl = "<xsl:transform version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" + "<xsl:output method='text'/>"
-                    + "<xsl:template match='fish'>" + "<xsl:value-of select='.'/>" + "<xsl:value-of select='name()'/>" + "</xsl:template>" + "</xsl:transform>";
+            String xsl = "<xsl:transform version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output method='text'/>"
+                    + "<xsl:template match='item/text()'><xsl:value-of select='.'/><xsl:value-of select='name(../..)'/></xsl:template></xsl:transform>";
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "text");
+
+            DOMResult dr = getDOMResult();
+            transform(null, b2, "bean2", dr, null);
+            Document d = (Document) dr.getNode();
+
+            debug(d);
+
             transform(new StreamSource(new StringReader(xsl)), b2, "bean2", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals("onefishtwofishredfishbluefish", sw.toString());
@@ -210,7 +217,8 @@ public class BeanSourceTest {
             trans.put(OutputKeys.METHOD, "xml");
             transform(null, b3, "bean3", new StreamResult(sw), trans);
             sw.flush();
-            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean3 type=\"bean\"><bean1 type=\"bean\"><name>example</name></bean1></bean3>", sw.toString());
+            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean3 type=\"bean\"><bean1 type=\"bean\"><name>example</name></bean1></bean3>",
+                    sw.toString());
         } catch (Exception e) {
             String msg = e.getMessage();
             Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
@@ -227,7 +235,7 @@ public class BeanSourceTest {
             transform(null, b4, "bean4", new StreamResult(sw), trans);
             sw.flush();
             Assert.assertEquals(
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean4><info><entry><key>A</key><value>1</value></entry><entry><key>B</key><value>2</value></entry></info></Bean4>",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean4 type=\"bean\"><info type=\"map\"><entry><key>A</key><value>1</value></entry><entry><key>B</key><value>2</value></entry></info></bean4>",
                     sw.toString());
         } catch (Exception e) {
             String msg = e.getMessage();

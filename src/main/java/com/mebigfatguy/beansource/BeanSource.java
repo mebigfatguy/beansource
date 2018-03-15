@@ -16,13 +16,11 @@
 
 package com.mebigfatguy.beansource;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.transform.sax.SAXSource;
@@ -241,34 +239,7 @@ public class BeanSource extends SAXSource {
                 if (c.isArray()) {
                     Class<?> arrayClass = c.getComponentType();
                     o = m.invoke(o, new Object[] {});
-                    if (o != null) {
-                        if (arrayClass.isEnum()) {
-                            int len = Array.getLength(o);
-                            for (int i = 0; i < len; i++) {
-                                emitPropertyAndValue(name, ((Enum<?>) o).name());
-                            }
-                        }
-
-                        if (validBeanClass(arrayClass)) {
-                            int len = Array.getLength(o);
-                            for (int i = 0; i < len; i++) {
-                                emitPropertyAndValue(name, Array.get(o, i));
-                            }
-                        } else if (java.util.Date.class.isAssignableFrom(arrayClass)) {
-                            DateFormat df = DateFormat.getDateTimeInstance();
-                            int len = Array.getLength(o);
-                            for (int i = 0; i < len; i++) {
-                                emitPropertyAndValue(name, df.format((Date) Array.get(o, i)));
-                            }
-                        } else {
-                            int len = Array.getLength(o);
-                            for (int i = 0; i < len; i++) {
-                                contentHandler.startElement("", "", name, emptyAttributes);
-                                parseObject(Array.get(o, i), null);
-                                contentHandler.endElement("", "", name);
-                            }
-                        }
-                    }
+                    parseObject(o, name);
                 } else if (c.isEnum()) {
                     o = m.invoke(o, new Object[] {});
                     emitPropertyAndValue(name, ((Enum<?>) o).name());
@@ -280,49 +251,11 @@ public class BeanSource extends SAXSource {
                     o = m.invoke(o, new Object[] {});
                     emitPropertyAndValue(name, df.format((Date) o));
                 } else if (Map.class.isAssignableFrom(c)) {
-                    contentHandler.startElement("", "", name, emptyAttributes);
                     o = m.invoke(o, new Object[] {});
-                    for (Map.Entry<?, ?> entry : ((Map<?, ?>) o).entrySet()) {
-                        Object key = entry.getKey();
-                        Object value = entry.getValue();
-
-                        contentHandler.startElement("", "", ENTRY, emptyAttributes);
-                        contentHandler.startElement("", "", KEY, emptyAttributes);
-                        if (validBeanClass(key.getClass())) {
-                            char[] chars = key.toString().toCharArray();
-                            contentHandler.characters(chars, 0, chars.length);
-                        } else {
-                            parseObject(key, null);
-                        }
-                        contentHandler.endElement("", "", KEY);
-                        contentHandler.startElement("", "", VALUE, emptyAttributes);
-                        if (validBeanClass(value.getClass())) {
-                            char[] chars = value.toString().toCharArray();
-                            contentHandler.characters(chars, 0, chars.length);
-                        } else {
-                            parseObject(key, null);
-                        }
-                        contentHandler.endElement("", "", VALUE);
-                        contentHandler.endElement("", "", ENTRY);
-
-                    }
-                    contentHandler.endElement("", "", name);
+                    parseObject(o, name);
                 } else if (Collection.class.isAssignableFrom(c)) {
-                    contentHandler.startElement("", "", name, emptyAttributes);
                     Collection<?> col = (Collection<?>) m.invoke(o, new Object[] {});
-                    Iterator<?> it = col.iterator();
-                    while (it.hasNext()) {
-                        o = it.next();
-                        if (validBeanClass(o.getClass())) {
-                            contentHandler.startElement("", "", ITEM, emptyAttributes);
-                            char[] chars = o.toString().toCharArray();
-                            contentHandler.characters(chars, 0, chars.length);
-                            contentHandler.endElement("", "", ITEM);
-                        } else {
-                            parseObject(o, null);
-                        }
-                    }
-                    contentHandler.endElement("", "", name);
+                    parseObject(col, name);
                 } else {
                     o = m.invoke(o, new Object[] {});
                     parseObject(o, name);
