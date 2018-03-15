@@ -17,8 +17,10 @@ package com.mebigfatguy.beansource;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -53,16 +55,14 @@ public class BeanSourceTest {
         try {
             Bean1 b1 = new Bean1();
             DOMResult dr = getDOMResult();
-            transform(null, b1, "bean1", dr, null);
+            transform(null, b1, "bean", dr, null);
             Document d = (Document) dr.getNode();
 
             debug(d);
 
             Element root = d.getDocumentElement();
-            Assert.assertEquals("bs:beansource", root.getNodeName());
-            Element bean = (Element) root.getFirstChild();
-            Assert.assertEquals("Bean1", bean.getNodeName());
-            NodeList nodes = bean.getElementsByTagName("name");
+            Assert.assertEquals("bean", root.getNodeName());
+            NodeList nodes = root.getElementsByTagName("name");
             Assert.assertEquals(1, nodes.getLength());
             Element child = (Element) nodes.item(0);
             nodes = child.getChildNodes();
@@ -79,6 +79,112 @@ public class BeanSourceTest {
 
     @Test
     public void testArrayBeanSource() {
+        try {
+            String[] list = new String[] { "Fee", "Fi", "Fo", "Fum" };
+
+            DOMResult dr = getDOMResult();
+            transform(null, list, "array", dr, null);
+            Document d = (Document) dr.getNode();
+
+            debug(d);
+
+            Element root = d.getDocumentElement();
+            Assert.assertEquals("array", root.getNodeName());
+            NodeList nodes = root.getElementsByTagName("item");
+            Assert.assertEquals(4, nodes.getLength());
+            Element child = (Element) nodes.item(0);
+            Text tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fee", tn.getNodeValue());
+            child = (Element) nodes.item(1);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fi", tn.getNodeValue());
+            child = (Element) nodes.item(2);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fo", tn.getNodeValue());
+            child = (Element) nodes.item(3);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fum", tn.getNodeValue());
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
+    @Test
+    public void testListBeanSource() {
+        try {
+            List<String> list = new ArrayList<>();
+            list.add("Fee");
+            list.add("Fi");
+            list.add("Fo");
+            list.add("Fum");
+
+            DOMResult dr = getDOMResult();
+            transform(null, list, "list", dr, null);
+            Document d = (Document) dr.getNode();
+
+            debug(d);
+
+            Element root = d.getDocumentElement();
+            Assert.assertEquals("list", root.getNodeName());
+            NodeList nodes = root.getElementsByTagName("item");
+            Assert.assertEquals(4, nodes.getLength());
+            Element child = (Element) nodes.item(0);
+            Text tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fee", tn.getNodeValue());
+            child = (Element) nodes.item(1);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fi", tn.getNodeValue());
+            child = (Element) nodes.item(2);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fo", tn.getNodeValue());
+            child = (Element) nodes.item(3);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fum", tn.getNodeValue());
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
+    @Test
+    public void testMapBeanSource() {
+        try {
+            Map<String, String> map = new HashMap<>();
+            map.put("heads", "tails");
+            map.put("cats", "dogs");
+            map.put("flotsum", "jetsom");
+
+            DOMResult dr = getDOMResult();
+            transform(null, map, "map", dr, null);
+            Document d = (Document) dr.getNode();
+
+            debug(d);
+
+            Element root = d.getDocumentElement();
+            Assert.assertEquals("map", root.getNodeName());
+            NodeList nodes = root.getElementsByTagName("key");
+            Assert.assertEquals(4, nodes.getLength());
+            Element child = (Element) nodes.item(0);
+            Text tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fee", tn.getNodeValue());
+            child = (Element) nodes.item(1);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fi", tn.getNodeValue());
+            child = (Element) nodes.item(2);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fo", tn.getNodeValue());
+            child = (Element) nodes.item(3);
+            tn = (Text) child.getFirstChild();
+            Assert.assertEquals("Fum", tn.getNodeValue());
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
+    @Test
+    public void testArrayGetterBeanSource() {
         try {
             Bean2 b2 = new Bean2();
             String xsl = "<xsl:transform version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" + "<xsl:output method='text'/>"
@@ -112,7 +218,7 @@ public class BeanSourceTest {
     }
 
     @Test
-    public void testMapBeanSource() {
+    public void testMapGetterBeanSource() {
         try {
             Bean4 b4 = new Bean4();
             StringWriter sw = new StringWriter();

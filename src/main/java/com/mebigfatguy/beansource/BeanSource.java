@@ -73,11 +73,9 @@ public class BeanSource extends SAXSource {
     }
 
     private static class BeanXMLReader implements XMLReader {
-        private static final String URI = "https://raw.githubusercontent.com/mebigfatguy/beansource/master/src/main/resources/com/mebigfatguy/beansource/beansource_v0.4.0.xsd";
 
-        private static final String PREFIX = "bs:";
-        private static final String BEANSOURCE = "beansource";
         private static final String BEAN = "bean";
+        private static final String ARRAY = "array";
         private static final String LIST = "list";
         private static final String MAP = "map";
         private static final String TYPE = "type";
@@ -85,8 +83,6 @@ public class BeanSource extends SAXSource {
         private static final String KEY = "key";
         private static final String VALUE = "value";
         private static final String ITEM = "item";
-        private static final String NAME = "name";
-        private static final String PROPERTY = "property";
 
         private Object bean;
         private String beanName;
@@ -175,24 +171,50 @@ public class BeanSource extends SAXSource {
             }
 
             contentHandler.startDocument();
-            contentHandler.startElement(URI, BEANSOURCE, PREFIX + BEANSOURCE, emptyAttributes);
             parseObject(bean, beanName);
-            contentHandler.endElement(URI, BEANSOURCE, PREFIX + BEANSOURCE);
             contentHandler.endDocument();
         }
 
         private void parseObject(Object o, String objectName) throws SAXException {
-            String beanClass;
 
-            if (o.getClass().isArray()) {
-
+            if (o == null) {
+                emitPropertyAndValue(objectName, "");
+            } else if (o.getClass().isArray()) {
+                AttributesAdapter aa = new AttributesAdapter();
+                aa.addAttribute(new Attribute("", "", TYPE, ARRAY));
+                contentHandler.startElement("", "", objectName, aa);
+                Object[] l = (Object[]) o;
+                for (Object oo : l) {
+                    parseObject(oo, ITEM);
+                }
+                contentHandler.endElement("", "", objectName);
             } else if (o instanceof List) {
-
+                AttributesAdapter aa = new AttributesAdapter();
+                aa.addAttribute(new Attribute("", "", TYPE, LIST));
+                contentHandler.startElement("", "", objectName, aa);
+                List<Object> l = (List<Object>) o;
+                for (Object oo : l) {
+                    parseObject(oo, ITEM);
+                }
+                contentHandler.endElement("", "", objectName);
             } else if (o instanceof Map) {
+                AttributesAdapter aa = new AttributesAdapter();
+                aa.addAttribute(new Attribute("", "", TYPE, MAP));
+                contentHandler.startElement("", "", objectName, aa);
+                Map<Object, Object> m = (Map<Object, Object>) o;
+                for (Map.Entry<Object, Object> entry : m.entrySet()) {
+                    contentHandler.startElement("", "", ENTRY, emptyAttributes);
+                    parseObject(entry.getKey(), KEY);
+                    parseObject(entry.getValue(), VALUE);
+                    contentHandler.endElement("", "", ENTRY);
+                }
+                contentHandler.endElement("", "", objectName);
+            } else if (validBeanClass(o.getClass())) {
+                emitPropertyAndValue(objectName, o);
             } else {
                 AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute(URI, NAME, PREFIX + NAME, objectName));
-                contentHandler.startElement(URI, BEAN, PREFIX + BEAN, aa);
+                aa.addAttribute(new Attribute("", "", TYPE, BEAN));
+                contentHandler.startElement("", "", objectName, aa);
 
                 Method[] methods = o.getClass().getMethods();
                 for (Method m : methods) {
@@ -201,7 +223,7 @@ public class BeanSource extends SAXSource {
                         emit(o, m);
                     }
                 }
-                contentHandler.endElement(URI, BEAN, PREFIX + BEAN);
+                contentHandler.endElement("", "", objectName);
             }
         }
 
