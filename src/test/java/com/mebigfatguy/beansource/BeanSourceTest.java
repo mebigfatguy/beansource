@@ -49,6 +49,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import com.mebigfatguy.beansource.annotations.BeanSourceProperty;
+
 public class BeanSourceTest {
 
     @Test
@@ -254,6 +256,22 @@ public class BeanSourceTest {
         }
     }
 
+    @Test
+    public void testExcludeField() {
+        try {
+            Bean6 b6 = new Bean6();
+            StringWriter sw = new StringWriter();
+            Properties trans = new Properties();
+            trans.put(OutputKeys.METHOD, "xml");
+            transform(null, b6, "bean6", new StreamResult(sw), trans);
+            sw.flush();
+            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean6 type=\"bean\"><name>Barbie</name></bean6>", sw.toString());
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
     private void transform(Source styleSheet, Object bean, String name, Result result, Properties transformProps)
             throws TransformerConfigurationException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
@@ -328,6 +346,17 @@ public class BeanSourceTest {
             s.add("Moe");
             s.add("Jack");
             return s;
+        }
+    }
+
+    public static class Bean6 {
+        public String getName() {
+            return "Barbie";
+        }
+
+        @BeanSourceProperty(BeanSourceProperty.Type.EXCLUDE)
+        public int getAge() {
+            return 22;
         }
     }
 }
