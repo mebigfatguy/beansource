@@ -188,14 +188,10 @@ public class BeanSourceTest {
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "text");
 
-            DOMResult dr = getDOMResult();
-            transform(null, b2, "bean2", dr, null);
-            Document d = (Document) dr.getNode();
-
-            debug(d);
-
             transform(new StreamSource(new StringReader(xsl)), b2, "bean2", new StreamResult(sw), trans);
             sw.flush();
+
+            System.out.println(sw.toString());
             Assert.assertEquals("onefishtwofishredfishbluefish", sw.toString());
         } catch (Exception e) {
             String msg = e.getMessage();

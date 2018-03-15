@@ -222,8 +222,9 @@ public class BeanSource extends SAXSource {
 
                 Method[] methods = o.getClass().getMethods();
                 for (Method m : methods) {
-                    if (m.getName().startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
-                            && !m.getName().equals("getClass")) {
+                    String methodName = m.getName();
+                    if (methodName.startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
+                            && !methodName.equals("getClass")) {
                         emit(o, m);
                     }
                 }
