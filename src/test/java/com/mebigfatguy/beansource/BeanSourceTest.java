@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -150,7 +151,7 @@ public class BeanSourceTest {
     @Test
     public void testMapBeanSource() {
         try {
-            Map<String, String> map = new HashMap<>();
+            Map<String, String> map = new TreeMap<>();
             map.put("heads", "tails");
             map.put("cats", "dogs");
             map.put("flotsum", "jetsom");
@@ -163,20 +164,12 @@ public class BeanSourceTest {
 
             Element root = d.getDocumentElement();
             Assert.assertEquals("map", root.getNodeName());
-            NodeList nodes = root.getElementsByTagName("key");
-            Assert.assertEquals(4, nodes.getLength());
-            Element child = (Element) nodes.item(0);
-            Text tn = (Text) child.getFirstChild();
-            Assert.assertEquals("Fee", tn.getNodeValue());
-            child = (Element) nodes.item(1);
-            tn = (Text) child.getFirstChild();
-            Assert.assertEquals("Fi", tn.getNodeValue());
-            child = (Element) nodes.item(2);
-            tn = (Text) child.getFirstChild();
-            Assert.assertEquals("Fo", tn.getNodeValue());
-            child = (Element) nodes.item(3);
-            tn = (Text) child.getFirstChild();
-            Assert.assertEquals("Fum", tn.getNodeValue());
+            NodeList nodes = root.getElementsByTagName("entry");
+            Assert.assertEquals(3, nodes.getLength());
+            Element entry = (Element) nodes.item(0);
+            Element key = (Element) entry.getFirstChild();
+            Text tn = (Text) key.getFirstChild();
+            Assert.assertEquals("cats", tn.getNodeValue());
         } catch (Exception e) {
             String msg = e.getMessage();
             Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
@@ -252,7 +245,8 @@ public class BeanSourceTest {
             trans.put(OutputKeys.METHOD, "xml");
             transform(null, b5, "bean5", new StreamResult(sw), trans);
             sw.flush();
-            Assert.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Bean5><names><item>Manny</item><item>Moe</item><item>Jack</item></names></Bean5>",
+            Assert.assertEquals(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bean5 type=\"bean\"><names type=\"collection\"><item>Manny</item><item>Moe</item><item>Jack</item></names></bean5>",
                     sw.toString());
         } catch (Exception e) {
             String msg = e.getMessage();
