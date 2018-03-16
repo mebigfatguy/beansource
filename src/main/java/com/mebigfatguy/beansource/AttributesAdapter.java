@@ -113,4 +113,9 @@ public class AttributesAdapter implements Attributes {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "AttributesAdapter[" + attributes + "]";
+    }
 }
