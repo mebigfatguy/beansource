@@ -164,6 +164,11 @@ public class BeanSource extends SAXSource {
         public void setProperty(String name, Object value) {
         }
 
+        @Override
+        public String toString() {
+            return "Beansource[beanName: " + beanName + ", bean: " + bean + "]";
+        }
+
         private void parse() throws SAXException {
             if (contentHandler == null) {
                 return;
