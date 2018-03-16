@@ -101,7 +101,7 @@
 								<Bundle-ClassPath>.</Bundle-ClassPath>
 								<Bundle-Vendor>beansource</Bundle-Vendor>
 								<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-								<Export-Package>com.mebigfatguy.beansource</Export-Package>
+								<Export-Package>com.mebigfatguy.beansource,com.mebigfatguy.beansource.annotations</Export-Package>
 								<Import-Package></Import-Package>
 							</manifestEntries>
 						</archive>
