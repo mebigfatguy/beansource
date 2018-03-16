@@ -187,9 +187,16 @@ public class BeanSource extends SAXSource {
                 AttributesAdapter aa = new AttributesAdapter();
                 aa.addAttribute(new Attribute("", "", TYPE, ARRAY));
                 contentHandler.startElement("", "", objectName, aa);
-                Object[] l = (Object[]) o;
-                for (Object oo : l) {
-                    parseObject(oo, ITEM);
+                if (o instanceof Object[]) {
+                    Object[] l = (Object[]) o;
+                    for (Object oo : l) {
+                        parseObject(oo, ITEM);
+                    }
+                } else {
+                    int length = java.lang.reflect.Array.getLength(o);
+                    for (int i = 0; i < length; i++) {
+                        parseObject(java.lang.reflect.Array.get(o, i), ITEM);
+                    }
                 }
                 contentHandler.endElement("", "", objectName);
             } else if (o instanceof Collection) {

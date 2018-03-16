@@ -179,6 +179,27 @@ public class BeanSourceTest {
     }
 
     @Test
+    public void testNestedArray() {
+        try {
+            int[][][] list = { { { 1, 2, 3 }, { 2, 3, 4 } }, { { 5, 6, 7 }, { 6, 7, 8 } } };
+
+            StringWriter sw = new StringWriter();
+            StreamResult sr = new StreamResult(sw);
+            transform(null, list, "array", sr, null);
+            sw.flush();
+
+            Assert.assertEquals(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><array type=\"array\"><item type=\"array\"><item type=\"array\"><item>1</item><item>2</item><item>3</item></item><item type=\"array\"><item>2</item><item>3</item><item>4</item></item></item><item type=\"array\"><item type=\"array\"><item>5</item><item>6</item><item>7</item></item><item type=\"array\"><item>6</item><item>7</item><item>8</item></item></item></array>",
+                    sw.toString());
+        } catch (
+
+        Exception e) {
+            String msg = e.getMessage();
+            Assert.fail(e.getClass().getName() + ((msg != null) ? (" " + e.getMessage()) : ""));
+        }
+    }
+
+    @Test
     public void testArrayGetterBeanSource() {
         try {
             Bean2 b2 = new Bean2();
