@@ -258,7 +258,6 @@ public class BeanSource extends SAXSource {
                 Class<?> c = m.getReturnType();
 
                 if (c.isArray()) {
-                    Class<?> arrayClass = c.getComponentType();
                     o = m.invoke(o, new Object[] {});
                     parseObject(o, name);
                 } else if (c.isEnum()) {
@@ -295,8 +294,10 @@ public class BeanSource extends SAXSource {
 
         private void emitPropertyAndValue(String property, Object value) throws SAXException {
             contentHandler.startElement("", property, property, emptyAttributes);
-            char[] chars = value.toString().toCharArray();
-            contentHandler.characters(chars, 0, chars.length);
+            if (value != null) {
+                char[] chars = value.toString().toCharArray();
+                contentHandler.characters(chars, 0, chars.length);
+            }
             contentHandler.endElement("", property, property);
         }
     }

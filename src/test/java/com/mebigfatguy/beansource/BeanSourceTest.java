@@ -183,7 +183,7 @@ public class BeanSourceTest {
         try {
             Bean2 b2 = new Bean2();
             String xsl = "<xsl:transform version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output method='text'/>"
-                    + "<xsl:template match='item/text()'><xsl:value-of select='.'/><xsl:value-of select='name(../..)'/></xsl:template></xsl:transform>";
+                    + "<xsl:template match='item/text()'><xsl:value-of select='normalize-space(.)'/><xsl:value-of select='name(../..)'/></xsl:template></xsl:transform>";
             StringWriter sw = new StringWriter();
             Properties trans = new Properties();
             trans.put(OutputKeys.METHOD, "text");
