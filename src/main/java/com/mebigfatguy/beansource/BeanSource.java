@@ -183,64 +183,66 @@ public class BeanSource extends SAXSource {
 
             if (o == null) {
                 emitPropertyAndValue(objectName, "");
-            } else if (o.getClass().isArray()) {
-                AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute("", "", TYPE, ARRAY));
-                contentHandler.startElement("", "", objectName, aa);
-                if (o instanceof Object[]) {
-                    Object[] l = (Object[]) o;
-                    for (Object oo : l) {
+            } else {
+                if (o.getClass().isArray()) {
+                    AttributesAdapter aa = new AttributesAdapter();
+                    aa.addAttribute(new Attribute("", "", TYPE, ARRAY));
+                    contentHandler.startElement("", "", objectName, aa);
+                    if (o instanceof Object[]) {
+                        Object[] l = (Object[]) o;
+                        for (Object oo : l) {
+                            parseObject(oo, ITEM);
+                        }
+                    } else {
+                        int length = java.lang.reflect.Array.getLength(o);
+                        for (int i = 0; i < length; i++) {
+                            parseObject(java.lang.reflect.Array.get(o, i), ITEM);
+                        }
+                    }
+                    contentHandler.endElement("", "", objectName);
+                } else if (o instanceof Collection) {
+                    AttributesAdapter aa = new AttributesAdapter();
+                    aa.addAttribute(new Attribute("", "", TYPE, COLLECTION));
+                    contentHandler.startElement("", "", objectName, aa);
+                    Collection<Object> c = (Collection<Object>) o;
+                    for (Object oo : c) {
                         parseObject(oo, ITEM);
                     }
+                    contentHandler.endElement("", "", objectName);
+                } else if (o instanceof Map) {
+                    AttributesAdapter aa = new AttributesAdapter();
+                    aa.addAttribute(new Attribute("", "", TYPE, MAP));
+                    contentHandler.startElement("", "", objectName, aa);
+                    Map<Object, Object> m = (Map<Object, Object>) o;
+                    for (Map.Entry<Object, Object> entry : m.entrySet()) {
+                        contentHandler.startElement("", "", ENTRY, emptyAttributes);
+                        parseObject(entry.getKey(), KEY);
+                        parseObject(entry.getValue(), VALUE);
+                        contentHandler.endElement("", "", ENTRY);
+                    }
+                    contentHandler.endElement("", "", objectName);
+                } else if (validBeanClass(o.getClass())) {
+                    emitPropertyAndValue(objectName, o);
+                } else if (o instanceof Enum) {
+                    emitPropertyAndValue(objectName, ((Enum<?>) o).name());
+                } else if (o instanceof java.util.Date) {
+                    DateFormat df = DateFormat.getDateTimeInstance();
+                    emitPropertyAndValue(objectName, df.format((Date) o));
                 } else {
-                    int length = java.lang.reflect.Array.getLength(o);
-                    for (int i = 0; i < length; i++) {
-                        parseObject(java.lang.reflect.Array.get(o, i), ITEM);
-                    }
-                }
-                contentHandler.endElement("", "", objectName);
-            } else if (o instanceof Collection) {
-                AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute("", "", TYPE, COLLECTION));
-                contentHandler.startElement("", "", objectName, aa);
-                Collection<Object> c = (Collection<Object>) o;
-                for (Object oo : c) {
-                    parseObject(oo, ITEM);
-                }
-                contentHandler.endElement("", "", objectName);
-            } else if (o instanceof Map) {
-                AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute("", "", TYPE, MAP));
-                contentHandler.startElement("", "", objectName, aa);
-                Map<Object, Object> m = (Map<Object, Object>) o;
-                for (Map.Entry<Object, Object> entry : m.entrySet()) {
-                    contentHandler.startElement("", "", ENTRY, emptyAttributes);
-                    parseObject(entry.getKey(), KEY);
-                    parseObject(entry.getValue(), VALUE);
-                    contentHandler.endElement("", "", ENTRY);
-                }
-                contentHandler.endElement("", "", objectName);
-            } else if (validBeanClass(o.getClass())) {
-                emitPropertyAndValue(objectName, o);
-            } else if (o instanceof Enum) {
-                emitPropertyAndValue(objectName, ((Enum<?>) o).name());
-            } else if (o instanceof java.util.Date) {
-                DateFormat df = DateFormat.getDateTimeInstance();
-                emitPropertyAndValue(objectName, df.format((Date) o));
-            } else {
-                AttributesAdapter aa = new AttributesAdapter();
-                aa.addAttribute(new Attribute("", "", TYPE, BEAN));
-                contentHandler.startElement("", "", objectName, aa);
+                    AttributesAdapter aa = new AttributesAdapter();
+                    aa.addAttribute(new Attribute("", "", TYPE, BEAN));
+                    contentHandler.startElement("", "", objectName, aa);
 
-                Method[] methods = o.getClass().getMethods();
-                for (Method m : methods) {
-                    String methodName = m.getName();
-                    if (methodName.startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
-                            && !methodName.equals("getClass")) {
-                        emitMethodCall(o, m);
+                    Method[] methods = o.getClass().getMethods();
+                    for (Method m : methods) {
+                        String methodName = m.getName();
+                        if (methodName.startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
+                                && !methodName.equals("getClass")) {
+                            emitMethodCall(o, m);
+                        }
                     }
+                    contentHandler.endElement("", "", objectName);
                 }
-                contentHandler.endElement("", "", objectName);
             }
         }
 
