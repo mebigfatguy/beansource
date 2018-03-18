@@ -261,28 +261,23 @@ public class BeanSource extends SAXSource {
                 }
 
                 Class<?> c = m.getReturnType();
+                o = m.invoke(o, new Object[] {});
 
                 if (c.isArray()) {
-                    o = m.invoke(o, new Object[] {});
                     parseObject(o, name);
                 } else if (c.isEnum()) {
-                    o = m.invoke(o, new Object[] {});
                     emitPropertyAndValue(name, ((Enum<?>) o).name());
                 } else if (validBeanClass(c)) {
-                    o = m.invoke(o, new Object[] {});
                     emitPropertyAndValue(name, o);
                 } else if (java.util.Date.class.isAssignableFrom(c)) {
                     DateFormat df = DateFormat.getDateTimeInstance();
-                    o = m.invoke(o, new Object[] {});
                     emitPropertyAndValue(name, df.format((Date) o));
                 } else if (Map.class.isAssignableFrom(c)) {
-                    o = m.invoke(o, new Object[] {});
                     parseObject(o, name);
                 } else if (Collection.class.isAssignableFrom(c)) {
-                    Collection<?> col = (Collection<?>) m.invoke(o, new Object[] {});
+                    Collection<?> col = (Collection<?>) o;
                     parseObject(col, name);
                 } else {
-                    o = m.invoke(o, new Object[] {});
                     parseObject(o, name);
                 }
 
