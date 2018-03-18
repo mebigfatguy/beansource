@@ -249,17 +249,15 @@ public class BeanSource extends SAXSource {
             name = name.substring(0, 1).toLowerCase() + name.substring(1);
 
             try {
-                BeanSourceProperty[] properties = m.getAnnotationsByType(BeanSourceProperty.class);
-                if ((properties != null) && (properties.length == 1)) {
-                    switch (properties[0].value()) {
-                        case EXCLUDE:
-                            return;
-                        case SIMPLE:
-                            emitPropertyAndValue(name, String.valueOf(m.invoke(o, new Object[] {})));
-                            return;
-                        default:
-                        break;
-                    }
+
+                switch (getMethodAnnotation(m)) {
+                    case EXCLUDE:
+                        return;
+                    case SIMPLE:
+                        emitPropertyAndValue(name, String.valueOf(m.invoke(o, new Object[] {})));
+                        return;
+                    default:
+                    break;
                 }
 
                 Class<?> c = m.getReturnType();
@@ -291,6 +289,16 @@ public class BeanSource extends SAXSource {
             } catch (Exception e) {
                 throw new SAXException(e);
             }
+        }
+
+        private BeanSourceProperty.Type getMethodAnnotation(Method m) {
+            BeanSourceProperty[] properties = m.getAnnotationsByType(BeanSourceProperty.class);
+
+            if ((properties == null) || (properties.length != 1)) {
+                return BeanSourceProperty.Type.COMPLEX;
+            }
+
+            return properties[0].value();
         }
 
         private boolean validBeanClass(Class<?> c) {
