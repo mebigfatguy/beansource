@@ -271,7 +271,10 @@ public class BeanSource extends SAXSource {
         }
 
         private void emitObject(Object o, Class<?> c, String name) throws SAXException {
-            if (c.isArray()) {
+
+            if (o == null) {
+                emitPropertyAndValue(name, "");
+            } else if (c.isArray()) {
                 parseObject(o, name);
             } else if (c.isEnum()) {
                 emitPropertyAndValue(name, ((Enum<?>) o).name());
