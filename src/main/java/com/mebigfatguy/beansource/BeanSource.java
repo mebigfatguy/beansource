@@ -294,13 +294,13 @@ public class BeanSource extends SAXSource {
         }
 
         private BeanSourceProperty.Type getMethodAnnotation(Method m) {
-            BeanSourceProperty[] properties = m.getAnnotationsByType(BeanSourceProperty.class);
+            BeanSourceProperty property = m.getAnnotation(BeanSourceProperty.class);
 
-            if ((properties == null) || (properties.length != 1)) {
+            if (property == null) {
                 return BeanSourceProperty.Type.COMPLEX;
             }
 
-            return properties[0].value();
+            return property.value();
         }
 
         private boolean validBeanClass(Class<?> c) {
