@@ -237,14 +237,14 @@ public class BeanSource extends SAXSource {
                     String methodName = m.getName();
                     if (methodName.startsWith("get") && ((m.getModifiers() & Modifier.PUBLIC) != 0) && (m.getParameterTypes().length == 0)
                             && !methodName.equals("getClass")) {
-                        emit(o, m);
+                        emitMethodCall(o, m);
                     }
                 }
                 contentHandler.endElement("", "", objectName);
             }
         }
 
-        private void emit(Object o, Method m) throws SAXException {
+        private void emitMethodCall(Object o, Method m) throws SAXException {
             String name = m.getName().substring("get".length());
             name = name.substring(0, 1).toLowerCase() + name.substring(1);
 
@@ -263,26 +263,30 @@ public class BeanSource extends SAXSource {
                 Class<?> c = m.getReturnType();
                 o = m.invoke(o, new Object[] {});
 
-                if (c.isArray()) {
-                    parseObject(o, name);
-                } else if (c.isEnum()) {
-                    emitPropertyAndValue(name, ((Enum<?>) o).name());
-                } else if (validBeanClass(c)) {
-                    emitPropertyAndValue(name, o);
-                } else if (java.util.Date.class.isAssignableFrom(c)) {
-                    DateFormat df = DateFormat.getDateTimeInstance();
-                    emitPropertyAndValue(name, df.format((Date) o));
-                } else if (Map.class.isAssignableFrom(c)) {
-                    parseObject(o, name);
-                } else if (Collection.class.isAssignableFrom(c)) {
-                    Collection<?> col = (Collection<?>) o;
-                    parseObject(col, name);
-                } else {
-                    parseObject(o, name);
-                }
+                emitObject(o, c, name);
 
             } catch (Exception e) {
                 throw new SAXException(e);
+            }
+        }
+
+        private void emitObject(Object o, Class<?> c, String name) throws SAXException {
+            if (c.isArray()) {
+                parseObject(o, name);
+            } else if (c.isEnum()) {
+                emitPropertyAndValue(name, ((Enum<?>) o).name());
+            } else if (validBeanClass(c)) {
+                emitPropertyAndValue(name, o);
+            } else if (java.util.Date.class.isAssignableFrom(c)) {
+                DateFormat df = DateFormat.getDateTimeInstance();
+                emitPropertyAndValue(name, df.format((Date) o));
+            } else if (Map.class.isAssignableFrom(c)) {
+                parseObject(o, name);
+            } else if (Collection.class.isAssignableFrom(c)) {
+                Collection<?> col = (Collection<?>) o;
+                parseObject(col, name);
+            } else {
+                parseObject(o, name);
             }
         }
 
