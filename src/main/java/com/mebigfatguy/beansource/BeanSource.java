@@ -254,19 +254,17 @@ public class BeanSource extends SAXSource {
 
                 switch (getMethodAnnotation(m)) {
                     case EXCLUDE:
-                        return;
+                    break;
                     case SIMPLE:
                         emitPropertyAndValue(name, String.valueOf(m.invoke(o, new Object[] {})));
-                        return;
+                    break;
                     default:
+                        Class<?> c = m.getReturnType();
+                        o = m.invoke(o, new Object[] {});
+
+                        emitObject(o, c, name);
                     break;
                 }
-
-                Class<?> c = m.getReturnType();
-                o = m.invoke(o, new Object[] {});
-
-                emitObject(o, c, name);
-
             } catch (Exception e) {
                 throw new SAXException(e);
             }
